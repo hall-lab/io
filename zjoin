@@ -106,7 +106,11 @@ join substitute
 		parser.print_help()
 		print
 	else:
-		zjoin(opts.aFile, opts.bFile, opts.aCol, opts.bCol, opts.notA, opts.delim, opts.allRows, opts.emptyFill)
-		
+		try:
+			zjoin(opts.aFile, opts.bFile, opts.aCol, opts.bCol, opts.notA, opts.delim, opts.allRows, opts.emptyFill)
+		except IOError as err:
+			sys.stderr.write("IOError " + str(err) + "\n");
+			return
+					
 if __name__ == "__main__":
 	sys.exit(main())
