@@ -5,7 +5,7 @@ import string
 from optparse import OptionParser
 
 
-def zjoin(aFile, bFile, aCol, bCol, notA, delim, allRows, emptyFill):	
+def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass_prefix):
 	bCol = bCol - 1
 	aCol = aCol - 1	
 	bDict = {}		
@@ -39,14 +39,29 @@ def zjoin(aFile, bFile, aCol, bCol, notA, delim, allRows, emptyFill):
 		aData = open(aFile, 'r')
 
 	for aLine in aData:
+		if pass_prefix is not None and aLine.startswith(pass_prefix):
+			print aLine.strip()
+			continue
 		a = aLine.strip().split(delim)	
 		try:
 			if a[aCol] in bDict:
 				if (not notA): 
 					for b in bDict[a[aCol]]:
-						print string.join(a, delim) + delim + string.join(b, delim)
+						if write == 'a':
+							s = string.join(a, delim)
+						elif write == 'b':
+							s = string.join(b, delim)
+						elif write == 'both':
+							s = string.join(a, delim) + delim + string.join(b, delim)
+						print s
 			elif allRows:
-			    print string.join(a, delim) + delim +  string.join(fakeCols, delim)
+				if write == 'a':
+					s = string.join(a, delim)
+				elif write == 'b':
+					s = string.join(fakeCols, delim)
+				elif write == 'both':
+					s = string.join(a, delim) + delim +  string.join(fakeCols, delim)
+				print s
 			else:
 			    if (notA):
 				    print string.join(a, delim) 
@@ -85,6 +100,12 @@ join substitute
 	parser.add_option("-2", "--bCol", dest="bCol", default=1, type="int",
 		help="the column for the b file",
 		metavar="INT")
+
+	parser.add_option("-w", "--write", dest="write",
+		type='choice', choices=['a', 'b', 'both'],
+		default='both',
+		help="output a, b, or both; default = both",
+		metavar="STR")
 	
 	parser.add_option("-d", "--delim", dest="delim", default="\t", type="str",
 		help="the delimiter; default = tab",
@@ -92,6 +113,9 @@ join substitute
 
 	parser.add_option("-v", "--notA", action="store_true", dest="notA",
 		help="print all rows in aFile that do not join with bFile")
+
+	parser.add_option("-p", "--pass", metavar='STR', dest="pass_prefix",
+		help="prefix for comment lines in aFile to pass unfiltered")
 
 	parser.add_option("-r", "--allRows", action="store_true", dest="allRows",
 		help="print all rows in aFile; if match, add B cols; if not, add NA (or text specified by -f)")
@@ -107,7 +131,7 @@ join substitute
 		print
 	else:
 		try:
-			zjoin(opts.aFile, opts.bFile, opts.aCol, opts.bCol, opts.notA, opts.delim, opts.allRows, opts.emptyFill)
+			zjoin(opts.aFile, opts.bFile, opts.aCol, opts.bCol, opts.write, opts.notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix)
 		except IOError as err:
 			sys.stderr.write("IOError " + str(err) + "\n");
 			return
