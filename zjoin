@@ -5,7 +5,7 @@ import string
 from optparse import OptionParser
 
 
-def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass_prefix):
+def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass_prefix, ignore_prefix):
 	bCol = bCol - 1
 	aCol = aCol - 1	
 	bDict = {}		
@@ -14,6 +14,12 @@ def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass
 	else:
 		bData = open(bFile, 'r')
 	for bLine in bData:
+		if pass_prefix is not None and bLine.startswith(pass_prefix) and write == 'b':
+			print bLine.strip()
+			continue
+		if ignore_prefix is not None and bLine.startswith(ignore_prefix):
+			continue
+
 		b = bLine.strip().split(delim)
 		# numCols = len(b)
 		fakeCols = []
@@ -39,8 +45,10 @@ def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass
 		aData = open(aFile, 'r')
 
 	for aLine in aData:
-		if pass_prefix is not None and aLine.startswith(pass_prefix):
+		if pass_prefix is not None and aLine.startswith(pass_prefix) and write != 'b':
 			print aLine.strip()
+			continue
+		if ignore_prefix is not None and aLine.startswith(ignore_prefix):
 			continue
 		a = aLine.strip().split(delim)	
 		try:
@@ -115,7 +123,10 @@ join substitute
 		help="print all rows in aFile that do not join with bFile")
 
 	parser.add_option("-p", "--pass", metavar='STR', dest="pass_prefix",
-		help="prefix for comment lines in aFile to pass unfiltered")
+		help="prefix for comment lines to pass unfiltered")
+
+	parser.add_option("-P", "--ignore", metavar='STR', dest="ignore_prefix",
+		help="prefix for comment lines in aFile or bFile to ignore")
 
 	parser.add_option("-r", "--allRows", action="store_true", dest="allRows",
 		help="print all rows in aFile; if match, add B cols; if not, add NA (or text specified by -f)")
@@ -131,10 +142,14 @@ join substitute
 		print
 	else:
 		try:
-			zjoin(opts.aFile, opts.bFile, opts.aCol, opts.bCol, opts.write, opts.notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix)
+			zjoin(opts.aFile, opts.bFile, opts.aCol, opts.bCol, opts.write, opts.notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix, opts.ignore_prefix)
 		except IOError as err:
 			sys.stderr.write("IOError " + str(err) + "\n");
 			return
-					
+
 if __name__ == "__main__":
-	sys.exit(main())
+	try:
+		main()
+        except IOError, e:
+		if e.errno != 32:  # ignore SIGPIPE
+			raise 
