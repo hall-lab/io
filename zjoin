@@ -2,8 +2,8 @@
 
 import sys
 import string
+import gzip
 from optparse import OptionParser
-
 
 def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass_prefix, ignore_prefix):
 	bCol = bCol - 1
@@ -11,6 +11,8 @@ def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass
 	bDict = {}		
 	if bFile == "stdin":
 		bData = sys.stdin
+	elif bFile.endswith('.gz'):
+		bData = gzip.open(bFile, 'rb')
 	else:
 		bData = open(bFile, 'r')
 	for bLine in bData:
@@ -41,6 +43,8 @@ def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass
 		
 	if aFile == "stdin":
 		aData = sys.stdin
+	elif aFile.endswith('.gz'):
+		aData = gzip.open(aFile, 'rb')
 	else:
 		aData = open(aFile, 'r')
 
