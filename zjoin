@@ -89,7 +89,7 @@ class Usage(Exception):
 		self.msg = msg		
 
 def main():
-	usage = """%prog -a <aFile>  -b <aFile>  -1 <aFile>  -2 <aFile>  -d <aFile>
+	usage = """%prog -a <aFile>  -b <bFile>  -1 <aColumn>  -2 <bColumn>  [-d <delimiter>]
 
 zjoin version 1.1
 Authors: Aaron Quinlan and Ira Hall	
