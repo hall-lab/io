@@ -127,7 +127,7 @@ join substitute
 		help="print all rows in aFile that do not join with bFile")
 
 	parser.add_option("-p", "--pass", metavar='STR', dest="pass_prefix",
-		help="prefix for comment lines to pass unfiltered")
+		help="prefix for comment lines to print unfiltered (useful for VCF header lines beginning with '#')")
 
 	parser.add_option("-P", "--ignore", metavar='STR', dest="ignore_prefix",
 		help="prefix for comment lines in aFile or bFile to ignore")
