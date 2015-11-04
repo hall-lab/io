@@ -5,9 +5,40 @@ import string
 import gzip
 from optparse import OptionParser
 
+def parse_columns(col_string):
+	# print col_string
+	col_list = []
+	c = col_string.split(',')
+	
+	for x in c:
+		x_split = x.split('-')
+		# print x_split
+		try:
+			x_split = [k - 1 for k in map(int, x_split)]
+		except ValueError:
+			sys.stderr.write('\nError: column list "%s" contains non-integer values\n\n' % col_string)
+			exit(1)
+		# print map(int, x.split('-'))
+
+		if len(x_split) == 2:
+			if x_split[1] >= x_split[0]:
+				col_list = col_list + range(x_split[0], x_split[1] + 1)
+			else:
+				# pass
+				col_list = col_list + list(reversed(range(x_split[1], x_split[0] + 1)))
+		elif len(x_split) > 2:
+			sys.stderr.write('\nError: column list "%s" contains illegal range "%s"\n\n' % (col_string, x))
+			exit(1)
+		else:
+			col_list = col_list + x_split
+		# print range(map(int, x.split('-')))
+	
+	print col_list
+	return col_list
+
 def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass_prefix, ignore_prefix):
-	bCol = bCol - 1
-	aCol = aCol - 1	
+	# bCol = bCol - 1
+	# aCol = aCol - 1	
 	bDict = {}		
 	if bFile == "stdin":
 		bData = sys.stdin
@@ -105,13 +136,13 @@ join substitute
 		help="A file or standard input (-b stdin). This file is loaded into memory - use smaller file",
 		metavar="FILE")
 
-	parser.add_option("-1", "--aCol", dest="aCol", default=1, type="int",
-		help="the colum for the a file.",
-		metavar="INT")
+	parser.add_option("-1", "--aCol", dest="aCol", default=1, type="str",
+		help="the column(s) for the a file. comma delimited ranges allowed (e.g.: 4-6,2,1)",
+		metavar="STR")
 	
-	parser.add_option("-2", "--bCol", dest="bCol", default=1, type="int",
-		help="the column for the b file",
-		metavar="INT")
+	parser.add_option("-2", "--bCol", dest="bCol", default=1, type="str",
+		help="the column(s) for the b file. comma delimited ranges allowed (e.g.: 4-6,2,1)",
+		metavar="STR")
 
 	parser.add_option("-w", "--write", dest="write",
 		type='choice', choices=['a', 'b', 'both'],
@@ -141,12 +172,25 @@ join substitute
 
 	(opts, args) = parser.parse_args()
 
+	# parse the column list and ranges
+	print "a"
+	aCol_list = parse_columns(opts.aCol)
+
+	print "b"
+	bCol_list = parse_columns(opts.bCol)
+
+	if len(aCol_list) != len(bCol_list):
+		sys.stderr.write("\nError: aCol and bCol differ in length\n\n")
+		exit(1)
+
+	# exit(1)
+
 	if opts.aFile is None:
 		parser.print_help()
 		print
 	else:
 		try:
-			zjoin(opts.aFile, opts.bFile, opts.aCol, opts.bCol, opts.write, opts.notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix, opts.ignore_prefix)
+			zjoin(opts.aFile, opts.bFile, aCol_list, bCol_list, opts.write, opts.notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix, opts.ignore_prefix)
 		except IOError as err:
 			sys.stderr.write("IOError " + str(err) + "\n");
 			return
