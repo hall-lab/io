@@ -178,20 +178,17 @@ join substitute
 
 	(opts, args) = parser.parse_args()
 
-	# parse the column list and ranges
-	aCol_list = parse_columns(opts.aCol)
-	bCol_list = parse_columns(opts.bCol)
-
-	if len(aCol_list) != len(bCol_list):
-		sys.stderr.write("\nError: aCol and bCol differ in length\n\n")
-		exit(1)
-
-	# exit(1)
-
 	if opts.aFile is None:
 		parser.print_help()
 		print
 	else:
+		# parse the column list and ranges
+		aCol_list = parse_columns(opts.aCol)
+		bCol_list = parse_columns(opts.bCol)
+		if len(aCol_list) != len(bCol_list):
+			sys.stderr.write("\nError: aCol and bCol differ in length\n\n")
+			exit(1)
+
 		try:
 			zjoin(opts.aFile, opts.bFile, aCol_list, bCol_list, opts.write, opts.notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix, opts.ignore_prefix)
 		except IOError as err:
