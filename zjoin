@@ -33,10 +33,12 @@ def parse_columns(col_string):
 			col_list = col_list + x_split
 		# print range(map(int, x.split('-')))
 	
-	print col_list
+	# print col_list
 	return col_list
 
-def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass_prefix, ignore_prefix):
+def zjoin(aFile, bFile, aCol_list, bCol_list, write, notA, delim, allRows, emptyFill, pass_prefix, ignore_prefix):
+	# if this string appears anywhere in the file, there will be problems
+	hash_delimiter = "ZJOIN7LQ2gy71XnZJOIN"
 	# bCol = bCol - 1
 	# aCol = aCol - 1	
 	bDict = {}		
@@ -60,12 +62,15 @@ def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass
 		    fakeCols.append(emptyFill)
 		#print fakeCols
 		#print str(i)
+
 		try:
-			if b[bCol] in bDict:
-				bDict[b[bCol]].append(b)
+			bCol_values = hash_delimiter.join([ b[bCol] for bCol in bCol_list ])
+			# print bCol_values
+			if bCol_values in bDict:
+				bDict[bCol_values].append(b)
 			else:
-				bDict[b[bCol]] = []			
-				bDict[b[bCol]].append(b)
+				bDict[bCol_values] = []			
+				bDict[bCol_values].append(b)
 		except IndexError, e:
 			print >> sys.stderr, "Column " + str(bCol+1) + \
 					" does not exist in file b:"
@@ -87,9 +92,10 @@ def zjoin(aFile, bFile, aCol, bCol, write, notA, delim, allRows, emptyFill, pass
 			continue
 		a = aLine.strip().split(delim)	
 		try:
-			if a[aCol] in bDict:
+			aCol_values = hash_delimiter.join([ a[aCol] for aCol in aCol_list ])
+			if aCol_values in bDict:
 				if (not notA): 
-					for b in bDict[a[aCol]]:
+					for b in bDict[aCol_values]:
 						if write == 'a':
 							s = string.join(a, delim)
 						elif write == 'b':
@@ -173,10 +179,7 @@ join substitute
 	(opts, args) = parser.parse_args()
 
 	# parse the column list and ranges
-	print "a"
 	aCol_list = parse_columns(opts.aCol)
-
-	print "b"
 	bCol_list = parse_columns(opts.bCol)
 
 	if len(aCol_list) != len(bCol_list):
