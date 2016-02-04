@@ -163,6 +163,9 @@ join substitute
 	parser.add_option("-v", "--notA", action="store_true", dest="notA",
 		help="print all rows in aFile that do not join with bFile")
 
+	parser.add_option("-V", "--notB", action="store_true", dest="notB",
+		help="print all rows in bFile that do not join with aFile")
+
 	parser.add_option("-p", "--pass", metavar='STR', dest="pass_prefix",
 		help="prefix for comment lines to print unfiltered (useful for VCF header lines beginning with '#')")
 
@@ -182,6 +185,22 @@ join substitute
 		parser.print_help()
 		print
 	else:
+		# if notB, then simply switch the A and B files and then do notA
+		if opts.notB:
+			notA = True
+			aFile = opts.bFile
+			bFile = opts.aFile
+
+			aCol = opts.bCol
+			bCol = opts.aCol
+		else:
+			notA = opts.notA
+			aFile = opts.aFile
+			bFile = opts.bFile
+			
+			aCol = opts.aCol
+			bCol = opts.bCol
+
 		# parse the column list and ranges
 		aCol_list = parse_columns(opts.aCol)
 		bCol_list = parse_columns(opts.bCol)
@@ -190,7 +209,7 @@ join substitute
 			exit(1)
 
 		try:
-			zjoin(opts.aFile, opts.bFile, aCol_list, bCol_list, opts.write, opts.notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix, opts.ignore_prefix)
+			zjoin(aFile, bFile, aCol_list, bCol_list, opts.write, notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix, opts.ignore_prefix)
 		except IOError as err:
 			sys.stderr.write("IOError " + str(err) + "\n");
 			return
