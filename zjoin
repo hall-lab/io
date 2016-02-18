@@ -142,11 +142,11 @@ join substitute
 		help="A file or standard input (-b stdin). This file is loaded into memory - use smaller file",
 		metavar="FILE")
 
-	parser.add_option("-1", "--aCol", dest="aCol", default=1, type="str",
+	parser.add_option("-1", "--aCol", dest="aCol", default='1', type="str",
 		help="the column(s) for the a file. comma delimited ranges allowed (e.g.: 4-6,2,1)",
 		metavar="STR")
 	
-	parser.add_option("-2", "--bCol", dest="bCol", default=1, type="str",
+	parser.add_option("-2", "--bCol", dest="bCol", default='1', type="str",
 		help="the column(s) for the b file. comma delimited ranges allowed (e.g.: 4-6,2,1)",
 		metavar="STR")
 
