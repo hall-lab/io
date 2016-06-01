@@ -202,8 +202,8 @@ join substitute
 			bCol = opts.bCol
 
 		# parse the column list and ranges
-		aCol_list = parse_columns(opts.aCol)
-		bCol_list = parse_columns(opts.bCol)
+		aCol_list = parse_columns(aCol)
+		bCol_list = parse_columns(bCol)
 		if len(aCol_list) != len(bCol_list):
 			sys.stderr.write("\nError: aCol and bCol differ in length\n\n")
 			exit(1)
