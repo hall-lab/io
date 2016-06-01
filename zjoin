@@ -173,7 +173,7 @@ join substitute
 		help="prefix for comment lines in aFile or bFile to ignore")
 
 	parser.add_option("-r", "--allRows", action="store_true", dest="allRows",
-		help="print all rows in aFile; if match, add B cols; if not, add NA (or text specified by -f)")
+                help="print all rows in aFile; if match, add B cols; if not, add NA (or text specified by -e)")
 
 	parser.add_option("-e", "--emptyFill", dest="emptyFill", default="NA", type="str",
 		help="what to fill empty columns with when -r is used; default = NA",
