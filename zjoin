@@ -36,11 +36,19 @@ def parse_columns(col_string):
 	# print col_list
 	return col_list
 
-def zjoin(aFile, bFile, aCol_list, bCol_list, write, notA, delim, allRows, emptyFill, pass_prefix, ignore_prefix):
-	# if this string appears anywhere in the file, there will be problems
-	hash_delimiter = "ZJOIN7LQ2gy71XnZJOIN"
-	# bCol = bCol - 1
-	# aCol = aCol - 1	
+def zjoin(aFile,
+	  bFile,
+	  aCol_list,
+	  bCol_list,
+	  write,
+	  notA,
+	  delim,
+	  allRows,
+	  emptyFill,
+	  pass_prefix,
+	  ignore_prefix,
+	  swap):
+
 	bDict = {}		
 	if bFile == "stdin":
 		bData = sys.stdin
@@ -56,16 +64,12 @@ def zjoin(aFile, bFile, aCol_list, bCol_list, write, notA, delim, allRows, empty
 			continue
 
 		b = bLine.strip('\n').split(delim)
-		# numCols = len(b)
 		fakeCols = []
 		for i in range(0,len(b)):
 		    fakeCols.append(emptyFill)
-		#print fakeCols
-		#print str(i)
 
 		try:
-			bCol_values = hash_delimiter.join([ b[bCol] for bCol in bCol_list ])
-			# print bCol_values
+			bCol_values = delim.join([ b[bCol] for bCol in bCol_list ])
 			if bCol_values in bDict:
 				bDict[bCol_values].append(b)
 			else:
@@ -92,7 +96,7 @@ def zjoin(aFile, bFile, aCol_list, bCol_list, write, notA, delim, allRows, empty
 			continue
 		a = aLine.strip('\n').split(delim)	
 		try:
-			aCol_values = hash_delimiter.join([ a[aCol] for aCol in aCol_list ])
+			aCol_values = delim.join([ a[aCol] for aCol in aCol_list ])
 			if aCol_values in bDict:
 				if (not notA): 
 					for b in bDict[aCol_values]:
@@ -101,7 +105,10 @@ def zjoin(aFile, bFile, aCol_list, bCol_list, write, notA, delim, allRows, empty
 						elif write == 'b':
 							s = string.join(b, delim)
 						elif write == 'both':
-							s = string.join(a, delim) + delim + string.join(b, delim)
+							if swap:
+								s = string.join(b, delim) + delim + string.join(a, delim)
+							else:
+								s = string.join(a, delim) + delim + string.join(b, delim)
 						print s
 			elif allRows:
 				if write == 'a':
@@ -109,7 +116,10 @@ def zjoin(aFile, bFile, aCol_list, bCol_list, write, notA, delim, allRows, empty
 				elif write == 'b':
 					s = string.join(fakeCols, delim)
 				elif write == 'both':
-					s = string.join(a, delim) + delim +  string.join(fakeCols, delim)
+					if swap:
+						s = string.join(fakeCols, delim) + delim +  string.join(a, delim)
+					else:
+						s = string.join(a, delim) + delim +  string.join(fakeCols, delim)
 				print s
 			else:
 			    if (notA):
@@ -179,6 +189,9 @@ join substitute
 		help="what to fill empty columns with when -r is used; default = NA",
 		metavar="STR")
 
+	parser.add_option("-s", "--swap", dest="swap", action='store_true',
+		help="swap the output column order (b, a)")
+
 	(opts, args) = parser.parse_args()
 
 	if opts.aFile is None:
@@ -209,7 +222,18 @@ join substitute
 			exit(1)
 
 		try:
-			zjoin(aFile, bFile, aCol_list, bCol_list, opts.write, notA, opts.delim, opts.allRows, opts.emptyFill, opts.pass_prefix, opts.ignore_prefix)
+			zjoin(aFile,
+			      bFile,
+			      aCol_list,
+			      bCol_list,
+			      opts.write,
+			      notA,
+			      opts.delim,
+			      opts.allRows,
+			      opts.emptyFill,
+			      opts.pass_prefix,
+			      opts.ignore_prefix,
+			      opts.swap)
 		except IOError as err:
 			sys.stderr.write("IOError " + str(err) + "\n");
 			return
